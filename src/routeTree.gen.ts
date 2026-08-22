@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AddProductRouteImport } from './routes/add-product'
+import { Route as CaseFileRouteImport } from './routes/case-file'
 import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
 import { Route as MissingEvidenceRouteImport } from './routes/missing-evidence'
 import { Route as PassportRouteImport } from './routes/passport'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AddProductRoute = AddProductRouteImport.update({
   id: '/add-product',
   path: '/add-product',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CaseFileRoute = CaseFileRouteImport.update({
+  id: '/case-file',
+  path: '/case-file',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClaimCheckupRoute = ClaimCheckupRouteImport.update({
@@ -50,6 +56,7 @@ const UploadProofRoute = UploadProofRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/add-product'
+    | '/case-file'
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/add-product'
+    | '/case-file'
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/add-product'
+    | '/case-file'
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddProductRoute: typeof AddProductRoute
+  CaseFileRoute: typeof CaseFileRoute
   ClaimCheckupRoute: typeof ClaimCheckupRoute
   MissingEvidenceRoute: typeof MissingEvidenceRoute
   PassportRoute: typeof PassportRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/add-product'
       fullPath: '/add-product'
       preLoaderRoute: typeof AddProductRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/case-file': {
+      id: '/case-file'
+      path: '/case-file'
+      fullPath: '/case-file'
+      preLoaderRoute: typeof CaseFileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/claim-checkup': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddProductRoute: AddProductRoute,
+  CaseFileRoute: CaseFileRoute,
   ClaimCheckupRoute: ClaimCheckupRoute,
   MissingEvidenceRoute: MissingEvidenceRoute,
   PassportRoute: PassportRoute,
