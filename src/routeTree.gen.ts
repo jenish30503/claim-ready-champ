@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AddProductRouteImport } from './routes/add-product'
+import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
 import { Route as PassportRouteImport } from './routes/passport'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const AddProductRoute = AddProductRouteImport.update({
   path: '/add-product',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClaimCheckupRoute = ClaimCheckupRouteImport.update({
+  id: '/claim-checkup',
+  path: '/claim-checkup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PassportRoute = PassportRouteImport.update({
   id: '/passport',
   path: '/passport',
@@ -32,30 +38,34 @@ const PassportRoute = PassportRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/claim-checkup': typeof ClaimCheckupRoute
   '/passport': typeof PassportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/claim-checkup': typeof ClaimCheckupRoute
   '/passport': typeof PassportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/claim-checkup': typeof ClaimCheckupRoute
   '/passport': typeof PassportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add-product' | '/passport'
+  fullPaths: '/' | '/add-product' | '/claim-checkup' | '/passport'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add-product' | '/passport'
-  id: '__root__' | '/' | '/add-product' | '/passport'
+  to: '/' | '/add-product' | '/claim-checkup' | '/passport'
+  id: '__root__' | '/' | '/add-product' | '/claim-checkup' | '/passport'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddProductRoute: typeof AddProductRoute
+  ClaimCheckupRoute: typeof ClaimCheckupRoute
   PassportRoute: typeof PassportRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AddProductRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/claim-checkup': {
+      id: '/claim-checkup'
+      path: '/claim-checkup'
+      fullPath: '/claim-checkup'
+      preLoaderRoute: typeof ClaimCheckupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/passport': {
       id: '/passport'
       path: '/passport'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddProductRoute: AddProductRoute,
+  ClaimCheckupRoute: ClaimCheckupRoute,
   PassportRoute: PassportRoute,
 }
 export const routeTree = rootRouteImport
