@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AddProductRouteImport } from './routes/add-product'
+import { Route as PassportRouteImport } from './routes/passport'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const AddProductRoute = AddProductRouteImport.update({
   path: '/add-product',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PassportRoute = PassportRouteImport.update({
+  id: '/passport',
+  path: '/passport',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/passport': typeof PassportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/passport': typeof PassportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/add-product': typeof AddProductRoute
+  '/passport': typeof PassportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/add-product'
+  fullPaths: '/' | '/add-product' | '/passport'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/add-product'
-  id: '__root__' | '/' | '/add-product'
+  to: '/' | '/add-product' | '/passport'
+  id: '__root__' | '/' | '/add-product' | '/passport'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AddProductRoute: typeof AddProductRoute
+  PassportRoute: typeof PassportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AddProductRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/passport': {
+      id: '/passport'
+      path: '/passport'
+      fullPath: '/passport'
+      preLoaderRoute: typeof PassportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AddProductRoute: AddProductRoute,
+  PassportRoute: PassportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
