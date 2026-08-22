@@ -24,7 +24,7 @@ export const Route = createFileRoute("/claim-checkup")({
       },
     ],
   }),
-  component: ClaimCheckup;
+  component: ClaimCheckup,
 });
 
 function ClaimCheckup() {
