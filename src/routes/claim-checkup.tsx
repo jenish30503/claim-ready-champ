@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { supabase } from "@/lib/supabase";
 import { ArrowLeft, Stethoscope, CheckCircle2, XCircle, ArrowRight, FileText, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 
@@ -29,6 +30,12 @@ export const Route = createFileRoute("/claim-checkup")({
       },
     ],
   }),
+  beforeLoad: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw redirect({ to: "/login" });
+    }
+  },
   component: ClaimCheckup,
 });
 

@@ -13,9 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AddProductRouteImport } from './routes/add-product'
 import { Route as CaseFileRouteImport } from './routes/case-file'
 import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissingEvidenceRouteImport } from './routes/missing-evidence'
 import { Route as PassportRouteImport } from './routes/passport'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ScanRouteImport } from './routes/scan'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UploadProofRouteImport } from './routes/upload-proof'
 
 const IndexRoute = IndexRouteImport.update({
@@ -38,6 +41,11 @@ const ClaimCheckupRoute = ClaimCheckupRouteImport.update({
   path: '/claim-checkup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MissingEvidenceRoute = MissingEvidenceRouteImport.update({
   id: '/missing-evidence',
   path: '/missing-evidence',
@@ -48,9 +56,19 @@ const PassportRoute = PassportRouteImport.update({
   path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UploadProofRoute = UploadProofRouteImport.update({
@@ -64,9 +82,12 @@ export interface FileRoutesByFullPath {
   '/add-product': typeof AddProductRoute
   '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
+  '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
+  '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRoutesByTo {
@@ -74,9 +95,12 @@ export interface FileRoutesByTo {
   '/add-product': typeof AddProductRoute
   '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
+  '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
+  '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRoutesById {
@@ -85,9 +109,12 @@ export interface FileRoutesById {
   '/add-product': typeof AddProductRoute
   '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
+  '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
+  '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRouteTypes {
@@ -97,9 +124,12 @@ export interface FileRouteTypes {
     | '/add-product'
     | '/case-file'
     | '/claim-checkup'
+    | '/login'
     | '/missing-evidence'
     | '/passport'
+    | '/profile'
     | '/scan'
+    | '/signup'
     | '/upload-proof'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -107,9 +137,12 @@ export interface FileRouteTypes {
     | '/add-product'
     | '/case-file'
     | '/claim-checkup'
+    | '/login'
     | '/missing-evidence'
     | '/passport'
+    | '/profile'
     | '/scan'
+    | '/signup'
     | '/upload-proof'
   id:
     | '__root__'
@@ -117,9 +150,12 @@ export interface FileRouteTypes {
     | '/add-product'
     | '/case-file'
     | '/claim-checkup'
+    | '/login'
     | '/missing-evidence'
     | '/passport'
+    | '/profile'
     | '/scan'
+    | '/signup'
     | '/upload-proof'
   fileRoutesById: FileRoutesById
 }
@@ -128,9 +164,12 @@ export interface RootRouteChildren {
   AddProductRoute: typeof AddProductRoute
   CaseFileRoute: typeof CaseFileRoute
   ClaimCheckupRoute: typeof ClaimCheckupRoute
+  LoginRoute: typeof LoginRoute
   MissingEvidenceRoute: typeof MissingEvidenceRoute
   PassportRoute: typeof PassportRoute
+  ProfileRoute: typeof ProfileRoute
   ScanRoute: typeof ScanRoute
+  SignupRoute: typeof SignupRoute
   UploadProofRoute: typeof UploadProofRoute
 }
 
@@ -164,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClaimCheckupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/missing-evidence': {
       id: '/missing-evidence'
       path: '/missing-evidence'
@@ -178,11 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/scan': {
       id: '/scan'
       path: '/scan'
       fullPath: '/scan'
       preLoaderRoute: typeof ScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/upload-proof': {
@@ -200,9 +260,12 @@ const rootRouteChildren: RootRouteChildren = {
   AddProductRoute: AddProductRoute,
   CaseFileRoute: CaseFileRoute,
   ClaimCheckupRoute: ClaimCheckupRoute,
+  LoginRoute: LoginRoute,
   MissingEvidenceRoute: MissingEvidenceRoute,
   PassportRoute: PassportRoute,
+  ProfileRoute: ProfileRoute,
   ScanRoute: ScanRoute,
+  SignupRoute: SignupRoute,
   UploadProofRoute: UploadProofRoute,
 }
 export const routeTree = rootRouteImport

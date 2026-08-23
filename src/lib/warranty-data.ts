@@ -1,5 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "./supabase";
+import { queryClient } from "../router";
 import { useSyncExternalStore } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 export type ProofState = "available" | "missing";
 
@@ -26,150 +28,122 @@ export type Product = {
   };
 };
 
-export const initialProducts: Product[] = [
-  {
-    id: "lg-washer",
-    brand: "LG",
-    name: "LG Washing Machine",
-    model: "FHD-7KG-8821",
-    category: "Front-load washer, 7 kg",
-    seller: "Reliance Digital",
-    warrantyProvider: "LG Electronics India Pvt Ltd",
-    value: 38500,
-    daysLeft: 7,
-    purchaseDate: "14 March 2025",
-    warrantyEnd: "13 March 2027",
-    serialNumber: "LG7KG-8821-IN",
-    documents: [{ name: "lg-washer-invoice.pdf", kind: "Invoice / Receipt" }],
-    covered: ["Motor and drum assembly", "Control board faults", "On-site technician visit"],
-    notCovered: ["Rubber gasket wear", "Damage from hard water", "Unauthorized repairs"],
-    proof: { receipt: "available", warrantyCard: "missing", serialPhoto: "missing" },
-  },
-  {
-    id: "samsung-tv",
-    brand: "Samsung",
-    name: "Samsung 55-inch QLED TV",
-    model: "QA55Q70BAKXXL",
-    category: "QLED 55-inch TV",
-    seller: "Amazon India",
-    warrantyProvider: "Samsung India Electronics Pvt. Ltd.",
-    value: 72990,
-    daysLeft: 18,
-    purchaseDate: "9 September 2025",
-    warrantyEnd: "8 September 2027",
-    serialNumber: "SN55Q70-IN-4419",
-    documents: [
-      { name: "samsung-tv-invoice.pdf", kind: "Invoice / Receipt" },
-      { name: "samsung-warranty-card.jpg", kind: "Warranty card" },
-    ],
-    covered: ["Panel and backlight faults", "Main board replacement", "In-home service"],
-    notCovered: ["Physical / liquid damage", "Burn-in from static images", "Third-party wall mounts"],
-    proof: { receipt: "available", warrantyCard: "available", serialPhoto: "missing" },
-  },
-  {
-    id: "airpods",
-    brand: "Apple",
-    name: "Apple AirPods Pro",
-    model: "A2931",
-    category: "Wireless earbuds",
-    seller: "Imagine Store",
-    warrantyProvider: "Apple India Private Limited",
-    value: 24900,
-    daysLeft: 142,
-    purchaseDate: "2 January 2026",
-    warrantyEnd: "1 January 2027",
-    serialNumber: "G6Y2L8KQP7",
-    documents: [
-      { name: "airpods-pro-invoice.pdf", kind: "Invoice / Receipt" },
-      { name: "apple-limited-warranty.pdf", kind: "Warranty card" },
-    ],
-    covered: ["Manufacturing defects", "Battery service if below spec", "Charging case hardware"],
-    notCovered: ["Lost earbuds", "Ear-tip wear", "Water damage beyond IP rating"],
-    proof: { receipt: "available", warrantyCard: "available", serialPhoto: "available" },
-  },
-  {
-    id: "sony-xm5",
-    brand: "Sony",
-    name: "Sony WH-1000XM5 Headphones",
-    model: "WH-1000XM5/BM",
-    category: "Over-ear headphones",
-    seller: "Croma",
-    warrantyProvider: "Sony India Pvt. Ltd.",
-    value: 29990,
-    daysLeft: 260,
-    purchaseDate: "20 May 2026",
-    warrantyEnd: "19 May 2027",
-    serialNumber: "XM5-IN-204418",
-    documents: [
-      { name: "sony-xm5-invoice.pdf", kind: "Invoice / Receipt" },
-      { name: "sony-warranty-card.jpg", kind: "Warranty card" },
-    ],
-    covered: ["Drivers and ANC hardware", "Headband hinge defects", "Carry-in service"],
-    notCovered: ["Ear-cushion wear", "Cable accessories", "Drops and crush damage"],
-    proof: { receipt: "available", warrantyCard: "available", serialPhoto: "available" },
-  },
-];
-
-const PRODUCT_KEY = "warranty-tracker-products";
-const productListeners = new Set<() => void>();
-let currentProducts = [...initialProducts];
+// Fallback empty array
 const emptyProducts: Product[] = [];
 
-function persistProducts() {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(PRODUCT_KEY, JSON.stringify(currentProducts));
-}
-
-function readProducts() {
-  if (typeof window === "undefined") return [...initialProducts];
-  try {
-    const raw = window.localStorage.getItem(PRODUCT_KEY);
-    if (raw) {
-      return JSON.parse(raw) as Product[];
-    }
-    window.localStorage.setItem(PRODUCT_KEY, JSON.stringify(initialProducts));
-    return [...initialProducts];
-  } catch {
-    return [...initialProducts];
-  }
-}
-
-if (typeof window !== "undefined") {
-  currentProducts = readProducts();
-}
-
-export const subscribeProducts = (l: () => void) => {
-  productListeners.add(l);
-  return () => productListeners.delete(l);
-};
-
 export const useProducts = () => {
-  return useSyncExternalStore(subscribeProducts, () => currentProducts, () => emptyProducts);
+  const { data } = useQuery({
+    queryKey: ["products"],
+    queryFn: async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return [];
+
+      const { data, error } = await supabase
+        .from("products")
+        .select("data")
+        .order("created_at", { ascending: false });
+        
+      if (error) {
+        console.error("Failed to fetch products", error);
+        return [];
+      }
+      return data.map((row) => row.data as Product);
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
+  
+  return data ?? emptyProducts;
 };
 
-export const addProduct = (p: Product) => {
-  currentProducts = [p, ...currentProducts];
-  persistProducts();
-  productListeners.forEach((l) => l());
+export const addProduct = async (p: Product) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // Optimistic update
+  queryClient.setQueryData(["products"], (old: Product[] | undefined) => {
+    return [p, ...(old ?? [])];
+  });
+
+  const { error } = await supabase.from("products").insert({
+    user_id: session.user.id,
+    data: p
+  });
+
+  if (error) {
+    console.error("Failed to add product", error);
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  }
 };
 
-export const updateProduct = (p: Product) => {
-  currentProducts = currentProducts.map(existing => existing.id === p.id ? p : existing);
-  persistProducts();
-  productListeners.forEach((l) => l());
+export const updateProduct = async (p: Product) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // Optimistic update
+  queryClient.setQueryData(["products"], (old: Product[] | undefined) => {
+    return (old ?? []).map(existing => existing.id === p.id ? p : existing);
+  });
+
+  // To update by ID in a JSONB structure without a dedicated column for product id, 
+  // we would ideally need a separate id column. However, we can use a raw update 
+  // query if we know the supabase setup, or just do a delete+insert or match data->>'id'.
+  // Assuming 'data->>id' works in Supabase:
+  const { error } = await supabase
+    .from("products")
+    .update({ data: p })
+    .eq("user_id", session.user.id)
+    .eq("data->>id", p.id);
+
+  if (error) {
+    console.error("Failed to update product", error);
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  }
 };
 
-export const deleteProduct = (id: string) => {
-  currentProducts = currentProducts.filter(existing => existing.id !== id);
-  persistProducts();
-  productListeners.forEach((l) => l());
+export const deleteProduct = async (id: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  // Optimistic update
+  queryClient.setQueryData(["products"], (old: Product[] | undefined) => {
+    return (old ?? []).filter(existing => existing.id !== id);
+  });
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("user_id", session.user.id)
+    .eq("data->>id", id);
+
+  if (error) {
+    console.error("Failed to delete product", error);
+    queryClient.invalidateQueries({ queryKey: ["products"] });
+  }
 };
 
-export const samsung = initialProducts.find((p) => p.id === "samsung-tv")!;
+// Fallback dummy for missing product to avoid crashes during transitions
+const fallbackProduct: Product = {
+  id: "fallback",
+  brand: "Unknown",
+  name: "Loading...",
+  model: "",
+  category: "",
+  seller: "",
+  warrantyProvider: "",
+  value: 0,
+  daysLeft: 0,
+  purchaseDate: "",
+  warrantyEnd: "",
+  serialNumber: "",
+  documents: [],
+  covered: [],
+  notCovered: [],
+  proof: { receipt: "missing", warrantyCard: "missing", serialPhoto: "missing" },
+};
 
 export const useProduct = (id?: string) => {
   const products = useProducts();
-  return products.find((p) => p.id === id) ?? samsung;
+  return products.find((p) => p.id === id) ?? fallbackProduct;
 };
 
 export const formatINR = (value: number) => `₹${value.toLocaleString("en-IN")}`;
@@ -216,8 +190,7 @@ function readReminders() {
     if (raw) {
       return new Set<string>(JSON.parse(raw) as string[]);
     }
-    // Default to 2 active reminders for the demo
-    const defaultReminders = new Set<string>(["lg-washer", "samsung-tv"]);
+    const defaultReminders = new Set<string>();
     window.localStorage.setItem(REMINDER_KEY, JSON.stringify([...defaultReminders]));
     return defaultReminders;
   } catch {

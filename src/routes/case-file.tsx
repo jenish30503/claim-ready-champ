@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { supabase } from "@/lib/supabase";
 import { ArrowLeft, CheckCircle2, Copy, Download, FileCheck2, Mail, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +28,12 @@ export const Route = createFileRoute("/case-file")({
       },
     ],
   }),
+  beforeLoad: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw redirect({ to: "/login" });
+    }
+  },
   component: CaseFile,
 });
 
