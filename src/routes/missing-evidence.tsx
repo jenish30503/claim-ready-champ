@@ -1,22 +1,27 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Check, Quote, TriangleAlert, Upload, X } from "lucide-react";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { ArrowLeft, CheckCircle2, Quote, TriangleAlert, Upload, XCircle } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { warrantyClause } from "@/lib/warranty-store";
+import { 
+  warrantyClause, 
+  getProduct, 
+  resolvedProof, 
+  proofCount, 
+  claimReadinessScore,
+  useSerialPhotoAdded 
+} from "@/lib/warranty-data";
 
 export const Route = createFileRoute("/missing-evidence")({
+  validateSearch: (search: Record<string, unknown>): { product?: string } => {
+    const product = search["product"];
+    return typeof product === "string" ? { product } : {};
+  },
   head: () => ({
     meta: [
-      { title: "Missing evidence warning — Warranty Tracker" },
+      { title: "Missing Evidence — ClaimReady" },
       {
         name: "description",
-        content:
-          "One required document is missing from your Samsung TV claim. Add the serial-number photo to avoid rejection.",
-      },
-      { property: "og:title", content: "Missing evidence warning — Warranty Tracker" },
-      {
-        property: "og:description",
         content: "Your claim is almost ready — one required proof item is still missing.",
       },
     ],
@@ -24,18 +29,29 @@ export const Route = createFileRoute("/missing-evidence")({
   component: MissingEvidence,
 });
 
-const checklist = [
-  { label: "Purchase invoice", ok: true },
-  { label: "Warranty card", ok: true },
-  { label: "Fault photo/video", ok: true },
-  { label: "Product serial-number photo", ok: false },
-];
-
 function MissingEvidence() {
   const navigate = useNavigate();
+  const { product: productId } = Route.useSearch();
+  const product = getProduct(productId);
+  const serialAdded = useSerialPhotoAdded();
+  
+  const score = claimReadinessScore(product, serialAdded);
+  const resolved = resolvedProof(product, serialAdded);
+  const readyCount = proofCount(product, serialAdded);
+  
+  if (score === 100) {
+    // If somehow they get here but are 100% ready, redirect
+    navigate({ to: "/case-file", search: { product: product.id } });
+  }
+
+  const checklist = [
+    { label: "Purchase receipt", ok: resolved.receipt === 'available' },
+    { label: "Warranty document", ok: resolved.warrantyCard === 'available' },
+    { label: "Product serial-number photo", ok: resolved.serialPhoto === 'available' },
+  ];
 
   return (
-    <AppShell step={4} eyebrow="Step 4 of 6">
+    <AppShell step={4} eyebrow="Step 4 of 6" title="Claim Readiness Review" subtitle={`${product.brand} ${product.name}`}>
       <div className="rounded-2xl border-2 border-destructive/40 bg-card p-6 shadow-[var(--shadow-lift)] sm:p-8">
         <div className="flex items-start gap-4">
           <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-destructive text-destructive-foreground">
@@ -43,10 +59,10 @@ function MissingEvidence() {
           </span>
           <div>
             <h1 className="text-2xl font-extrabold sm:text-3xl">
-              Your claim is almost ready — 1 item is missing.
+              Your claim is almost ready — missing evidence.
             </h1>
             <p className="mt-2 text-sm font-semibold text-destructive">
-              Samsung QLED 55-inch TV · 3 of 4 required documents available
+              Claim Readiness: {score}% ({readyCount} of 3 required documents available)
             </p>
           </div>
         </div>
@@ -57,10 +73,10 @@ function MissingEvidence() {
               <li
                 key={c.label}
                 className={
-                  "flex items-center gap-3 rounded-xl border p-4 " +
+                  "flex items-center gap-3 rounded-xl border p-4 transition-colors " +
                   (c.ok
-                    ? "border-border bg-muted/50"
-                    : "border-destructive/50 bg-destructive/[0.06]")
+                    ? "border-success/30 bg-success/5"
+                    : "border-destructive/50 bg-destructive/10")
                 }
               >
                 <span
@@ -71,7 +87,7 @@ function MissingEvidence() {
                       : "bg-destructive text-destructive-foreground")
                   }
                 >
-                  {c.ok ? <Check className="size-4" /> : <X className="size-4" />}
+                  {c.ok ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
                 </span>
                 <span className="text-sm font-bold">{c.label}</span>
                 <span
@@ -79,7 +95,7 @@ function MissingEvidence() {
                     "ml-auto text-sm font-bold " + (c.ok ? "text-success" : "text-destructive")
                   }
                 >
-                  {c.ok ? "Available" : "Missing"}
+                  {c.ok ? "Verified" : "Missing"}
                 </span>
               </li>
             ))}
@@ -93,20 +109,19 @@ function MissingEvidence() {
 
             <div className="rounded-xl border border-border bg-card p-5">
               <p className="text-sm leading-relaxed font-semibold">
-                Your Samsung TV&apos;s serial-number photo is missing. Add it now to avoid a delayed
-                or rejected claim.
+                Missing required evidence will lead to a delayed or rejected claim. Upload the missing documents now to become 100% Claim-Ready.
               </p>
             </div>
           </div>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Button size="lg" onClick={() => navigate({ to: "/upload-proof" })}>
-            <Upload className="size-4" /> Upload missing proof
+          <Button size="lg" className="shadow-[var(--shadow-lift)] hover:-translate-y-0.5 transition-all" onClick={() => navigate({ to: "/upload-proof", search: { product: product.id } })}>
+            <Upload className="size-4 mr-2" /> Upload missing proof
           </Button>
           <Button asChild size="lg" variant="outline">
-            <Link to="/claim-checkup">
-              <ArrowLeft className="size-4" /> Back
+            <Link to="/claim-checkup" search={{ product: product.id }}>
+              <ArrowLeft className="size-4 mr-2" /> Back
             </Link>
           </Button>
         </div>

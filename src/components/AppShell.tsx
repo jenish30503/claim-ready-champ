@@ -33,7 +33,7 @@ export function AppShell({
             <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <ShieldCheck className="size-5" />
             </span>
-            <span className="text-base font-bold tracking-tight">Warranty Tracker</span>
+            <span className="text-base font-bold tracking-tight">ClaimReady</span>
           </Link>
           {step !== undefined && (
             <div className="hidden items-center gap-1.5 md:flex">
@@ -72,10 +72,6 @@ export function AppShell({
         )}
         {children}
       </main>
-
-      <footer className="mx-auto max-w-6xl px-6 pb-10 text-xs text-muted-foreground">
-        Demo prototype · sample data only, nothing leaves this device.
-      </footer>
     </div>
   );
 }

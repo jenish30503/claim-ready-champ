@@ -5,20 +5,19 @@ import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { addSerialPhoto, warrantyClause } from "@/lib/warranty-store";
+import { addSerialPhoto, warrantyClause, getProduct } from "@/lib/warranty-data";
 
 export const Route = createFileRoute("/upload-proof")({
+  validateSearch: (search: Record<string, unknown>): { product?: string } => {
+    const product = search["product"];
+    return typeof product === "string" ? { product } : {};
+  },
   head: () => ({
     meta: [
-      { title: "Upload proof — Warranty Tracker" },
+      { title: "Upload Proof — ClaimReady" },
       {
         name: "description",
-        content: "Attach the missing serial-number photo to complete your Samsung TV claim file.",
-      },
-      { property: "og:title", content: "Upload proof — Warranty Tracker" },
-      {
-        property: "og:description",
-        content: "Attach the missing serial-number photo and complete your claim case file.",
+        content: "Attach missing proof to complete your claim case file.",
       },
     ],
   }),
@@ -27,14 +26,16 @@ export const Route = createFileRoute("/upload-proof")({
 
 function UploadProof() {
   const navigate = useNavigate();
+  const { product: productId } = Route.useSearch();
+  const product = getProduct(productId);
   const [fileName, setFileName] = useState<string | null>(null);
 
   return (
     <AppShell
       step={5}
       eyebrow="Step 5 of 6"
-      title="Upload missing proof"
-      subtitle="Product serial-number photo · required by Warranty Requirement 4.2"
+      title="Upload Missing Proof"
+      subtitle={`${product.brand} ${product.name} · Serial Number Photo Required`}
     >
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="surface-card p-6">
@@ -53,21 +54,21 @@ function UploadProof() {
             </span>
             <p className="mt-4 text-sm font-bold">Photograph the serial-number label</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Usually on the back panel of the TV, near the ports. Click to upload.
+              Usually on the back or bottom panel of the product. Click to upload.
             </p>
           </label>
 
           {fileName ? (
-            <div className="mt-5 flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4">
-              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
+            <div className="mt-5 flex items-center gap-4 rounded-xl border border-border bg-success/5 p-4 border-success/30">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-card text-success">
                 <ImageIcon className="size-5" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold">{fileName}</p>
-                <p className="text-xs text-muted-foreground">JPG · Selected</p>
+                <p className="truncate text-sm font-bold text-success-foreground">{fileName}</p>
+                <p className="text-xs text-success-foreground/80">JPG · Selected</p>
               </div>
               <span className="ml-auto shrink-0 rounded-full bg-success px-2.5 py-1 text-xs font-bold text-success-foreground">
-                Ready
+                Ready to submit
               </span>
             </div>
           ) : (
@@ -80,17 +81,18 @@ function UploadProof() {
             <Button
               size="lg"
               disabled={!fileName}
+              className="shadow-[var(--shadow-lift)] hover:-translate-y-0.5 transition-all"
               onClick={() => {
                 addSerialPhoto();
-                toast.success("Serial-number photo added to your case file.");
-                navigate({ to: "/case-file" });
+                toast.success("Missing proof uploaded and verified!");
+                navigate({ to: "/case-file", search: { product: product.id } });
               }}
             >
-              <Plus className="size-4" /> Add to case file
+              <Plus className="size-4 mr-2" /> Mark as 100% Claim-Ready
             </Button>
             <Button asChild size="lg" variant="outline">
-              <Link to="/missing-evidence">
-                <ArrowLeft className="size-4" /> Back
+              <Link to="/missing-evidence" search={{ product: product.id }}>
+                <ArrowLeft className="size-4 mr-2" /> Back
               </Link>
             </Button>
           </div>
@@ -103,7 +105,7 @@ function UploadProof() {
           </blockquote>
           <p className="mt-4 text-sm text-muted-foreground">
             Make sure the full serial string is in focus and readable — blurred labels are the most
-            common reason a claim gets sent back.
+            common reason a claim gets delayed or rejected.
           </p>
         </div>
       </div>

@@ -9,16 +9,19 @@ const inputSchema = z.object({
 export type ScannedFields = {
   product: string;
   brand: string;
+  model: string;
   date: string;
   price: string;
   category: string;
+  seller: string;
+  warrantyProvider: string;
   serialNumber: string;
   warrantyTenure: string;
   expiryDate: string;
 };
 
 const PROMPT = `Read this receipt / invoice image. Reply ONLY with JSON, no other text, no markdown, no thinking tags:
-{"product": "...", "brand": "...", "date": "...", "price": "...", "category": "Electronics/Appliances/Clothing/Furniture/Other", "serialNumber": "...", "warrantyTenure": "...", "expiryDate": "..."}
+{"product": "...", "brand": "...", "model": "...", "date": "...", "price": "...", "category": "Electronics/Appliances/Clothing/Furniture/Other", "seller": "...", "warrantyProvider": "...", "serialNumber": "...", "warrantyTenure": "...", "expiryDate": "..."}
 Use DD Month YYYY for dates. Keep price as it appears including the currency symbol.
 If a field is not visible on the receipt, return an empty string "" for that field.`;
 
@@ -89,9 +92,12 @@ export const scanReceipt = createServerFn({ method: "POST" })
     const fields: ScannedFields = {
       product: pick("product"),
       brand: pick("brand"),
+      model: pick("model"),
       date: pick("date"),
       price: pick("price"),
       category: pick("category"),
+      seller: pick("seller"),
+      warrantyProvider: pick("warrantyProvider"),
       serialNumber: pick("serialNumber"),
       warrantyTenure: pick("warrantyTenure"),
       expiryDate: pick("expiryDate"),

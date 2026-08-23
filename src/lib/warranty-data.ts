@@ -6,7 +6,10 @@ export type Product = {
   id: string;
   brand: string;
   name: string;
+  model: string;
   category: string;
+  seller: string;
+  warrantyProvider: string;
   value: number;
   daysLeft: number;
   purchaseDate: string;
@@ -27,7 +30,10 @@ export const products: Product[] = [
     id: "lg-washer",
     brand: "LG",
     name: "LG Washing Machine",
+    model: "FHD-7KG-8821",
     category: "Front-load washer, 7 kg",
+    seller: "Reliance Digital",
+    warrantyProvider: "LG Electronics India Pvt Ltd",
     value: 38500,
     daysLeft: 7,
     purchaseDate: "14 March 2025",
@@ -42,7 +48,10 @@ export const products: Product[] = [
     id: "samsung-tv",
     brand: "Samsung",
     name: "Samsung 55-inch QLED TV",
+    model: "QA55Q70BAKXXL",
     category: "QLED 55-inch TV",
+    seller: "Amazon India",
+    warrantyProvider: "Samsung India Electronics Pvt. Ltd.",
     value: 72990,
     daysLeft: 18,
     purchaseDate: "9 September 2025",
@@ -60,7 +69,10 @@ export const products: Product[] = [
     id: "airpods",
     brand: "Apple",
     name: "Apple AirPods Pro",
+    model: "A2931",
     category: "Wireless earbuds",
+    seller: "Imagine Store",
+    warrantyProvider: "Apple India Private Limited",
     value: 24900,
     daysLeft: 142,
     purchaseDate: "2 January 2026",
@@ -78,7 +90,10 @@ export const products: Product[] = [
     id: "sony-xm5",
     brand: "Sony",
     name: "Sony WH-1000XM5 Headphones",
+    model: "WH-1000XM5/BM",
     category: "Over-ear headphones",
+    seller: "Croma",
+    warrantyProvider: "Sony India Pvt. Ltd.",
     value: 29990,
     daysLeft: 260,
     purchaseDate: "20 May 2026",
@@ -114,6 +129,11 @@ export function proofCount(p: Product, serialAdded: boolean) {
   return Object.values(resolvedProof(p, serialAdded)).filter((s) => s === "available").length;
 }
 
+export function claimReadinessScore(p: Product, serialAdded: boolean) {
+  const count = proofCount(p, serialAdded);
+  return Math.round((count / 3) * 100);
+}
+
 export {
   addSerialPhoto,
   claimEmail,
@@ -138,7 +158,13 @@ function readReminders() {
   if (typeof window === "undefined") return new Set<string>();
   try {
     const raw = window.localStorage.getItem(REMINDER_KEY);
-    return new Set<string>(raw ? (JSON.parse(raw) as string[]) : []);
+    if (raw) {
+      return new Set<string>(JSON.parse(raw) as string[]);
+    }
+    // Default to 2 active reminders for the demo
+    const defaultReminders = new Set<string>(["lg-washer", "samsung-tv"]);
+    window.localStorage.setItem(REMINDER_KEY, JSON.stringify([...defaultReminders]));
+    return defaultReminders;
   } catch {
     return new Set<string>();
   }

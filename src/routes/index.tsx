@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Bell, Plus, Search, ShieldCheck, TriangleAlert, Scan } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ArrowRight, Bell, Plus, Search, ShieldCheck, TriangleAlert, Scan, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import {
   formatINR,
   proofCount,
+  claimReadinessScore,
+  resolvedProof,
   sortedProducts,
   totalProtectedValue,
   useReminders,
@@ -18,16 +20,10 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your Warranty Vault — Warranty Tracker" },
+      { title: "ClaimReady — Turn your warranty into a claim-ready case" },
       {
         name: "description",
-        content:
-          "Track every product warranty, spot expiring coverage early, and keep claim proof ready in one vault.",
-      },
-      { property: "og:title", content: "Your Warranty Vault — Warranty Tracker" },
-      {
-        property: "og:description",
-        content: "Track warranties, expiry dates and claim proof for everything you own.",
+        content: "Keep receipts, warranty documents, serial numbers, and proof together — so you can build a claim in seconds.",
       },
     ],
   }),
@@ -39,7 +35,7 @@ type Filter = "all" | "expiring" | "missing" | "ready" | "reminders";
 const filters: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
   { id: "expiring", label: "Expiring soon" },
-  { id: "missing", label: "Missing proof" },
+  { id: "missing", label: "Needs attention" },
   { id: "ready", label: "Claim-ready" },
   { id: "reminders", label: "Reminders" },
 ];
@@ -58,8 +54,10 @@ function Dashboard() {
   const reminders = useReminders();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const navigate = useNavigate();
 
   const claimReadyCount = sortedProducts.filter((p) => proofCount(p, serialAdded) === 3).length;
+  const needsAttentionCount = sortedProducts.length - claimReadyCount;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -74,77 +72,46 @@ function Dashboard() {
     <AppShell step={0}>
       <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <div>
-          <p className="text-xs font-bold tracking-[0.16em] text-primary uppercase">
-            4 products protected
+          <h1 className="text-4xl font-extrabold sm:text-5xl tracking-tight">ClaimReady</h1>
+          <p className="mt-3 text-xl font-bold text-primary">
+            Turn your warranty into a claim-ready case.
           </p>
-          <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">Your Warranty Vault</h1>
-          <p className="mt-3 max-w-xl text-base text-muted-foreground">
-            Every receipt, warranty card and serial-number photo in one place — so a claim never
-            fails on missing paperwork.
+          <p className="mt-2 max-w-xl text-base text-muted-foreground">
+            Keep receipts, warranty documents, serial numbers, and proof together — so you can build a claim in seconds.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link to="/add-product">
-                <Plus className="size-4" /> Add product
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild size="lg" className="h-12 px-6 text-base shadow-[var(--shadow-lift)] hover:-translate-y-0.5 transition-all">
               <Link to="/scan">
-                <Scan className="size-4" /> Scan receipt
+                Make My Products Claim-Ready <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="h-12 px-6">
+              <Link to="/add-product">
+                <Plus className="mr-2 size-4" /> Add product
               </Link>
             </Button>
           </div>
         </div>
 
-        <div className="surface-card p-6">
-          <p className="text-sm font-semibold text-muted-foreground">Total protected value</p>
-          <p className="mt-1 text-4xl font-extrabold tracking-tight">
-            {formatINR(totalProtectedValue)}
-          </p>
-          <div className="mt-5 space-y-2.5 border-t border-border pt-4 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Expiring in 30 days</span>
-              <span className="font-semibold text-destructive">2 products</span>
+        <div className="surface-card p-6 flex flex-col justify-center">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+            <div>
+              <p className="text-3xl font-extrabold">{sortedProducts.length}</p>
+              <p className="text-sm font-semibold text-muted-foreground mt-1">Products Protected</p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Claim-ready</span>
-              <span className="font-semibold">{claimReadyCount} of 4 products</span>
+            <div>
+              <p className="text-3xl font-extrabold">{formatINR(totalProtectedValue)}</p>
+              <p className="text-sm font-semibold text-muted-foreground mt-1">Protected Value</p>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Expiry reminders</span>
-              <span className="font-semibold">{reminders.size} set</span>
+            <div>
+              <p className="text-3xl font-extrabold text-destructive">{needsAttentionCount}</p>
+              <p className="text-sm font-semibold text-muted-foreground mt-1">Claims Need Attention</p>
+            </div>
+            <div>
+              <p className="text-3xl font-extrabold text-success">{claimReadyCount}</p>
+              <p className="text-sm font-semibold text-muted-foreground mt-1">Fully Claim-Ready</p>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="text-lg font-bold">Coverage timeline</h2>
-        <p className="mt-1 text-sm text-muted-foreground">How much manufacturer warranty is left.</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {sortedProducts.map((p) => {
-            const urgent = p.daysLeft <= 30;
-            const pct = Math.max(6, Math.min(100, Math.round((p.daysLeft / 365) * 100)));
-            return (
-              <Link
-                key={p.id}
-                to="/passport"
-                search={{ product: p.id }}
-                className="surface-card block p-4 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-              >
-                <p className="truncate text-sm font-bold">{p.name}</p>
-                <p className={"mt-1 text-xs font-semibold " + (urgent ? "text-destructive" : "text-muted-foreground")}>
-                  {p.daysLeft} days left
-                </p>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={"h-full rounded-full " + (urgent ? "bg-destructive" : "bg-primary")}
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </Link>
-            );
-          })}
         </div>
       </div>
 
@@ -191,8 +158,10 @@ function Dashboard() {
         )}
         {visible.map((p) => {
           const urgent = p.daysLeft <= 30;
-          const ready = proofCount(p, serialAdded);
+          const readyCount = proofCount(p, serialAdded);
+          const score = claimReadinessScore(p, serialAdded);
           const reminded = reminders.has(p.id);
+          const resolved = resolvedProof(p, serialAdded);
 
           return (
             <Link
@@ -205,49 +174,59 @@ function Dashboard() {
               <div className="surface-card h-full p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                      {p.brand}
-                    </p>
-                    <h3 className="mt-1 text-lg font-bold">{p.name}</h3>
-                    <p className="text-sm text-muted-foreground">{p.category}</p>
+                    <h3 className="text-lg font-bold">{p.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">Purchased: {p.purchaseDate}</p>
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1.5">
                     {urgent ? (
-                      <span className="flex items-center gap-1 rounded-full bg-destructive px-2.5 py-1 text-xs font-bold text-destructive-foreground">
-                        <TriangleAlert className="size-3.5" /> Expiring soon
+                      <span className="flex items-center gap-1 rounded-full bg-destructive/10 px-2.5 py-1 text-xs font-bold text-destructive">
+                        <TriangleAlert className="size-3.5" /> {p.daysLeft} days left
                       </span>
                     ) : (
-                      <span className="flex items-center gap-1 rounded-full bg-accent px-2.5 py-1 text-xs font-bold text-accent-foreground">
-                        <ShieldCheck className="size-3.5" /> Covered
+                      <span className="flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-1 text-xs font-bold text-success">
+                        <ShieldCheck className="size-3.5" /> {p.daysLeft} days left
                       </span>
                     )}
                     {reminded && (
-                      <span className="flex items-center gap-1 rounded-full bg-warm px-2.5 py-1 text-xs font-bold">
-                        <Bell className="size-3.5 text-primary" /> Reminder on
+                      <span className="flex items-center gap-1 rounded-full bg-warm px-2.5 py-1 text-xs font-bold text-primary">
+                        <Bell className="size-3.5" /> Reminder on
                       </span>
                     )}
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-3 gap-3 border-t border-border pt-4 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Value</p>
-                    <p className="font-bold">{formatINR(p.value)}</p>
+                <div className="mt-4 flex items-center justify-between text-sm">
+                  <span className="font-semibold text-muted-foreground">Warranty expires in <span className="text-foreground">{p.daysLeft} days</span> ({p.warrantyEnd})</span>
+                </div>
+
+                <div className="mt-5 rounded-xl border border-border bg-muted/40 p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-bold">Claim readiness: {score}%</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{readyCount} of 3 evidence collected</span>
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Warranty ends</p>
-                    <p className={"font-bold " + (urgent ? "text-destructive" : "")}>
-                      in {p.daysLeft} days
-                    </p>
+                  
+                  <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden mb-4">
+                    <div className={`h-full rounded-full ${score === 100 ? 'bg-success' : score > 50 ? 'bg-amber-500' : 'bg-destructive'}`} style={{ width: `${score}%` }} />
                   </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Proof</p>
-                    <p className={"font-bold " + (ready < 3 ? "text-destructive" : "")}>{ready}/3</p>
-                  </div>
+
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-center gap-2">
+                      {resolved.receipt === 'available' ? <CheckCircle2 className="size-4 text-success" /> : <XCircle className="size-4 text-destructive" />}
+                      <span className={resolved.receipt === 'available' ? 'text-foreground font-medium' : 'text-muted-foreground'}>Receipt</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      {resolved.warrantyCard === 'available' ? <CheckCircle2 className="size-4 text-success" /> : <XCircle className="size-4 text-destructive" />}
+                      <span className={resolved.warrantyCard === 'available' ? 'text-foreground font-medium' : 'text-muted-foreground'}>Warranty card</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      {resolved.serialPhoto === 'available' ? <CheckCircle2 className="size-4 text-success" /> : <XCircle className="size-4 text-destructive" />}
+                      <span className={resolved.serialPhoto === 'available' ? 'text-foreground font-medium' : 'text-muted-foreground'}>Serial number photo</span>
+                    </li>
+                  </ul>
                 </div>
 
                 <p className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary">
-                  View passport <ArrowRight className="size-4" />
+                  Complete Claim Readiness <ArrowRight className="size-4" />
                 </p>
               </div>
             </Link>

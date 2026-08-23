@@ -82,7 +82,10 @@ export function buildScannedProduct(fields: {
     id: `scan-${Date.now()}`,
     brand: fields.brand.trim() || "Scanned receipt",
     name: fields.product.trim() || "Untitled product",
+    model: "Unknown Model", // fallback for hackathon demo
     category: fields.category.trim() || "Other",
+    seller: "Unknown Seller",
+    warrantyProvider: "Unknown Provider",
     value: parsePrice(fields.price),
     daysLeft: daysUntil(fields.expiryDate),
     purchaseDate: fields.date.trim() || "Not on receipt",
