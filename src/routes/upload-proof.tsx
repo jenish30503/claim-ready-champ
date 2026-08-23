@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { addSerialPhoto, warrantyClause, getProduct } from "@/lib/warranty-data";
+import { addSerialPhoto, warrantyClause, useProduct } from "@/lib/warranty-data";
 
 export const Route = createFileRoute("/upload-proof")({
   validateSearch: (search: Record<string, unknown>): { product?: string } => {
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/upload-proof")({
 function UploadProof() {
   const navigate = useNavigate();
   const { product: productId } = Route.useSearch();
-  const product = getProduct(productId);
+  const product = useProduct(productId);
   const [fileName, setFileName] = useState<string | null>(null);
 
   return (

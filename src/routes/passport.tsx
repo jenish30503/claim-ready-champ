@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/accordion";
 import {
   formatINR,
-  getProduct,
+  useProduct,
   proofCount,
   claimReadinessScore,
   resolvedProof,
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/passport")({
 function Passport() {
   const navigate = useNavigate();
   const { product: productId } = Route.useSearch();
-  const product = getProduct(productId);
+  const product = useProduct(productId);
   const serialAdded = useSerialPhotoAdded();
   const reminders = useReminders();
   const reminded = reminders.has(product.id);
@@ -125,7 +125,7 @@ function Passport() {
               size="lg"
               className="px-8 shadow-[var(--shadow-lift)] hover:-translate-y-0.5 transition-all"
               onClick={() => {
-                navigate({ to: "/claim-checkup" });
+                navigate({ to: "/claim-checkup", search: { product: product.id } });
               }}
             >
               Prepare Claim <ArrowRight className="size-4 ml-2" />

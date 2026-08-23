@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { scanReceipt, type ScannedFields } from "@/lib/scan.functions";
-import { addScannedProduct, buildScannedProduct } from "@/lib/scan-store";
+import { addProduct } from "@/lib/warranty-data";
+import { buildScannedProduct } from "@/lib/scan-store";
 
 export const Route = createFileRoute("/scan")({
   head: () => ({
@@ -203,7 +204,7 @@ function ScanPage() {
                       toast.error("Add a product name before saving.");
                       return;
                     }
-                    addScannedProduct(buildScannedProduct(fields));
+                    addProduct(buildScannedProduct(fields));
                     toast.success(`${fields.product.trim()} passport generated.`);
                     void navigate({ to: "/" });
                   }}

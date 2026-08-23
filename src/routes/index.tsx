@@ -10,8 +10,7 @@ import {
   proofCount,
   claimReadinessScore,
   resolvedProof,
-  sortedProducts,
-  totalProtectedValue,
+  useProducts,
   useReminders,
   useSerialPhotoAdded,
   type Product,
@@ -55,6 +54,10 @@ function Dashboard() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const navigate = useNavigate();
+
+  const products = useProducts();
+  const sortedProducts = useMemo(() => [...products].sort((a, b) => a.daysLeft - b.daysLeft), [products]);
+  const totalProtectedValue = useMemo(() => products.reduce((sum, p) => sum + p.value, 0), [products]);
 
   const claimReadyCount = sortedProducts.filter((p) => proofCount(p, serialAdded) === 3).length;
   const needsAttentionCount = sortedProducts.length - claimReadyCount;

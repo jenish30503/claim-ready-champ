@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 export type ProofState = "available" | "missing";
 
@@ -25,7 +26,7 @@ export type Product = {
   };
 };
 
-export const products: Product[] = [
+export const initialProducts: Product[] = [
   {
     id: "lg-washer",
     brand: "LG",
@@ -109,13 +110,67 @@ export const products: Product[] = [
   },
 ];
 
-export const sortedProducts = [...products].sort((a, b) => a.daysLeft - b.daysLeft);
+const PRODUCT_KEY = "warranty-tracker-products";
+const productListeners = new Set<() => void>();
+let currentProducts = [...initialProducts];
+const emptyProducts: Product[] = [];
 
-export const totalProtectedValue = 166380;
+function persistProducts() {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(PRODUCT_KEY, JSON.stringify(currentProducts));
+}
 
-export const samsung = products.find((p) => p.id === "samsung-tv")!;
+function readProducts() {
+  if (typeof window === "undefined") return [...initialProducts];
+  try {
+    const raw = window.localStorage.getItem(PRODUCT_KEY);
+    if (raw) {
+      return JSON.parse(raw) as Product[];
+    }
+    window.localStorage.setItem(PRODUCT_KEY, JSON.stringify(initialProducts));
+    return [...initialProducts];
+  } catch {
+    return [...initialProducts];
+  }
+}
 
-export const getProduct = (id?: string) => products.find((p) => p.id === id) ?? samsung;
+if (typeof window !== "undefined") {
+  currentProducts = readProducts();
+}
+
+export const subscribeProducts = (l: () => void) => {
+  productListeners.add(l);
+  return () => productListeners.delete(l);
+};
+
+export const useProducts = () => {
+  return useSyncExternalStore(subscribeProducts, () => currentProducts, () => emptyProducts);
+};
+
+export const addProduct = (p: Product) => {
+  currentProducts = [p, ...currentProducts];
+  persistProducts();
+  productListeners.forEach((l) => l());
+};
+
+export const updateProduct = (p: Product) => {
+  currentProducts = currentProducts.map(existing => existing.id === p.id ? p : existing);
+  persistProducts();
+  productListeners.forEach((l) => l());
+};
+
+export const deleteProduct = (id: string) => {
+  currentProducts = currentProducts.filter(existing => existing.id !== id);
+  persistProducts();
+  productListeners.forEach((l) => l());
+};
+
+export const samsung = initialProducts.find((p) => p.id === "samsung-tv")!;
+
+export const useProduct = (id?: string) => {
+  const products = useProducts();
+  return products.find((p) => p.id === id) ?? samsung;
+};
 
 export const formatINR = (value: number) => `₹${value.toLocaleString("en-IN")}`;
 

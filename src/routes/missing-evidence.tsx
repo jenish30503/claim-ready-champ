@@ -5,7 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { 
   warrantyClause, 
-  getProduct, 
+  useProduct, 
   resolvedProof, 
   proofCount, 
   claimReadinessScore,
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/missing-evidence")({
 function MissingEvidence() {
   const navigate = useNavigate();
   const { product: productId } = Route.useSearch();
-  const product = getProduct(productId);
+  const product = useProduct(productId);
   const serialAdded = useSerialPhotoAdded();
   
   const score = claimReadinessScore(product, serialAdded);

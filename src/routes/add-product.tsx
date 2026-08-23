@@ -5,7 +5,10 @@ import { useState, useEffect } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { addProduct, type Product } from "@/lib/warranty-data";
 
 export const Route = createFileRoute("/add-product")({
   head: () => ({
@@ -46,10 +49,21 @@ const initialFiles = [
 
 function AddProduct() {
   const navigate = useNavigate();
-  const [scanState, setScanState] = useState<"idle" | "scanning" | "complete">("idle");
+  const [scanState, setScanState] = useState<"idle" | "scanning" | "complete" | "failed">("idle");
   const [scanProgress, setScanProgress] = useState(0);
   const [uploadedFiles, setUploadedFiles] = useState(initialFiles);
   const [serialFile, setSerialFile] = useState<File | null>(null);
+
+  // Manual fallback form state
+  const [formData, setFormData] = useState({
+    brand: "",
+    name: "",
+    category: "",
+    value: "",
+    purchaseDate: "",
+    warrantyEnd: "",
+    serialNumber: "",
+  });
 
   useEffect(() => {
     if (scanState === "scanning") {
@@ -57,8 +71,8 @@ function AddProduct() {
         setScanProgress((prev) => {
           if (prev >= 100) {
             clearInterval(interval);
-            setScanState("complete");
-            toast.success("Document scanning complete.");
+            setScanState("failed");
+            toast.error("Failed to extract product details from document.");
             return 100;
           }
           return prev + 5;
@@ -93,6 +107,40 @@ function AddProduct() {
       }
       toast.success(`${file.name} uploaded successfully.`);
     }
+  };
+
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Create new product
+    const newProduct: Product = {
+      id: `prod-${Date.now()}`,
+      brand: formData.brand || "Unknown Brand",
+      name: formData.name || "Unknown Product",
+      model: "Unknown Model",
+      category: formData.category || "Other",
+      seller: "Unknown Seller",
+      warrantyProvider: "Unknown Provider",
+      value: parseInt(formData.value) || 0,
+      daysLeft: 365, // Simplified for demo
+      purchaseDate: formData.purchaseDate || "Unknown Date",
+      warrantyEnd: formData.warrantyEnd || "Unknown Date",
+      serialNumber: formData.serialNumber || "Missing",
+      documents: uploadedFiles
+        .filter(f => f.isUploaded)
+        .map(f => ({ name: f.file, kind: f.label })),
+      covered: ["Manufacturing defects"],
+      notCovered: ["Physical / liquid damage"],
+      proof: { 
+        receipt: uploadedFiles[0].isUploaded ? "available" : "missing", 
+        warrantyCard: uploadedFiles[1].isUploaded ? "available" : "missing", 
+        serialPhoto: serialFile ? "available" : "missing" 
+      },
+    };
+    
+    addProduct(newProduct);
+    toast.success("Product manually added to your vault.");
+    navigate({ to: "/" });
   };
 
   return (
@@ -182,35 +230,73 @@ function AddProduct() {
             </label>
           </div>
 
-          {scanState === "complete" && (
-            <div className="mt-6 rounded-xl border border-border bg-card overflow-hidden">
-              <div className="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                  <Sparkles className="size-4 text-primary" /> Scan Results
-                </h3>
-              </div>
+          {scanState === "failed" && (
+            <div className="mt-6 rounded-xl border border-destructive bg-destructive/10 overflow-hidden">
               <div className="p-4 space-y-4">
-                <div className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">Warranty End Date</p>
-                    <p className="font-bold mt-1 text-base">08 September 2027</p>
-                  </div>
-                  <span className="flex items-center gap-1.5 rounded-full bg-success/20 px-2.5 py-1 text-xs font-bold text-success">
-                    <CheckCircle2 className="size-3.5" /> Found
+                <div className="flex items-center gap-3">
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-destructive text-destructive-foreground">
+                    <AlertCircle className="size-4" />
                   </span>
-                </div>
-                <div className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0">
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground">Expiry Date</p>
-                    <p className="font-bold mt-1 text-base text-destructive">Missing</p>
-                    <p className="text-xs text-muted-foreground mt-1">Could not read expiry date from document.</p>
+                    <h3 className="text-sm font-bold text-destructive">Extraction Failed</h3>
+                    <p className="text-xs text-destructive/80 mt-0.5">We couldn't read the details from your documents. Please enter them manually below.</p>
                   </div>
-                  <span className="flex items-center gap-1.5 rounded-full bg-destructive/20 px-2.5 py-1 text-xs font-bold text-destructive">
-                    <AlertCircle className="size-3.5" /> Not Found
-                  </span>
                 </div>
               </div>
             </div>
+          )}
+
+          {scanState === "failed" && (
+            <form onSubmit={handleManualSubmit} className="mt-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="brand">Brand</Label>
+                  <Input id="brand" value={formData.brand} onChange={e => setFormData(f => ({...f, brand: e.target.value}))} required placeholder="e.g. Samsung" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Product Name</Label>
+                  <Input id="name" value={formData.name} onChange={e => setFormData(f => ({...f, name: e.target.value}))} required placeholder="e.g. 55-inch QLED TV" />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category">Category</Label>
+                  <Input id="category" value={formData.category} onChange={e => setFormData(f => ({...f, category: e.target.value}))} placeholder="e.g. Electronics" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="value">Price / Value (₹)</Label>
+                  <Input id="value" type="number" value={formData.value} onChange={e => setFormData(f => ({...f, value: e.target.value}))} placeholder="e.g. 72990" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="purchaseDate">Purchase Date</Label>
+                  <Input id="purchaseDate" value={formData.purchaseDate} onChange={e => setFormData(f => ({...f, purchaseDate: e.target.value}))} placeholder="e.g. 9 Sep 2025" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="warrantyEnd">Warranty End Date</Label>
+                  <Input id="warrantyEnd" value={formData.warrantyEnd} onChange={e => setFormData(f => ({...f, warrantyEnd: e.target.value}))} required placeholder="e.g. 8 Sep 2027" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="serialNumber">Serial Number</Label>
+                <Input id="serialNumber" value={formData.serialNumber} onChange={e => setFormData(f => ({...f, serialNumber: e.target.value}))} placeholder="e.g. SN55Q70-IN-4419" />
+              </div>
+
+              <div className="pt-2 flex flex-wrap gap-3">
+                <Button type="submit" size="lg">
+                  <Sparkles className="size-4 mr-2" /> Save manually to vault
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/">
+                    <ArrowLeft className="size-4 mr-2" /> Cancel
+                  </Link>
+                </Button>
+              </div>
+            </form>
           )}
 
           <div className="mt-6 flex flex-wrap gap-3">
@@ -246,11 +332,13 @@ function AddProduct() {
                 </Button>
               </>
             )}
-            <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
-              <Link to="/">
-                <ArrowLeft className="size-4" /> Back to vault
-              </Link>
-            </Button>
+            {(scanState === "idle" || scanState === "complete") && (
+              <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
+                <Link to="/">
+                  <ArrowLeft className="size-4" /> Back to vault
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
 

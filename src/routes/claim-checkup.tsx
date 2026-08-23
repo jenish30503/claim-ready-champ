@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  getProduct,
+  useProduct,
   proofCount,
   claimReadinessScore,
   resolvedProof,
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/claim-checkup")({
 function ClaimCheckup() {
   const navigate = useNavigate();
   const { product: productId } = Route.useSearch();
-  const product = getProduct(productId);
+  const product = useProduct(productId);
   const serialAdded = useSerialPhotoAdded();
   
   const score = claimReadinessScore(product, serialAdded);
@@ -58,9 +58,9 @@ function ClaimCheckup() {
               e.preventDefault();
               toast.success("Claim details saved.");
               if (isReady) {
-                navigate({ to: "/case-file" });
+                navigate({ to: "/case-file", search: { product: product.id } });
               } else {
-                navigate({ to: "/missing-evidence" });
+                navigate({ to: "/missing-evidence", search: { product: product.id } });
               }
             }}
           >
@@ -172,7 +172,7 @@ function ClaimCheckup() {
                       Most claims are delayed due to missing proof. Upload them now to become 100% ready.
                     </p>
                     <Button asChild size="lg" className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                      <Link to="/upload-proof">
+                      <Link to="/upload-proof" search={{ product: product.id }}>
                         Upload Missing Proof
                       </Link>
                     </Button>

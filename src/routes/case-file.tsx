@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { 
-  getProduct, 
+  useProduct, 
+  claimEmail, 
   resolvedProof, 
   formatINR,
   useSerialPhotoAdded, 
@@ -31,7 +32,7 @@ export const Route = createFileRoute("/case-file")({
 
 function CaseFile() {
   const { product: productId } = Route.useSearch();
-  const product = getProduct(productId);
+  const product = useProduct(productId);
   const serialAdded = useSerialPhotoAdded();
   const resolved = resolvedProof(product, serialAdded);
 
