@@ -15,6 +15,7 @@ import { Route as CaseFileRouteImport } from './routes/case-file'
 import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
 import { Route as MissingEvidenceRouteImport } from './routes/missing-evidence'
 import { Route as PassportRouteImport } from './routes/passport'
+import { Route as ScanRouteImport } from './routes/scan'
 import { Route as UploadProofRouteImport } from './routes/upload-proof'
 
 const IndexRoute = IndexRouteImport.update({
@@ -47,6 +48,11 @@ const PassportRoute = PassportRouteImport.update({
   path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ScanRoute = ScanRouteImport.update({
+  id: '/scan',
+  path: '/scan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UploadProofRoute = UploadProofRouteImport.update({
   id: '/upload-proof',
   path: '/upload-proof',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/scan': typeof ScanRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/scan': typeof ScanRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/claim-checkup': typeof ClaimCheckupRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
+  '/scan': typeof ScanRoute
   '/upload-proof': typeof UploadProofRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
+    | '/scan'
     | '/upload-proof'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
+    | '/scan'
     | '/upload-proof'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/claim-checkup'
     | '/missing-evidence'
     | '/passport'
+    | '/scan'
     | '/upload-proof'
   fileRoutesById: FileRoutesById
 }
@@ -118,6 +130,7 @@ export interface RootRouteChildren {
   ClaimCheckupRoute: typeof ClaimCheckupRoute
   MissingEvidenceRoute: typeof MissingEvidenceRoute
   PassportRoute: typeof PassportRoute
+  ScanRoute: typeof ScanRoute
   UploadProofRoute: typeof UploadProofRoute
 }
 
@@ -165,6 +178,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/scan': {
+      id: '/scan'
+      path: '/scan'
+      fullPath: '/scan'
+      preLoaderRoute: typeof ScanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/upload-proof': {
       id: '/upload-proof'
       path: '/upload-proof'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClaimCheckupRoute: ClaimCheckupRoute,
   MissingEvidenceRoute: MissingEvidenceRoute,
   PassportRoute: PassportRoute,
+  ScanRoute: ScanRoute,
   UploadProofRoute: UploadProofRoute,
 }
 export const routeTree = rootRouteImport
