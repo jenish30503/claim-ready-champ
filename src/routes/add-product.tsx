@@ -33,17 +33,17 @@ const initialFiles = [
     id: "invoice",
     icon: FileText,
     label: "Invoice / Receipt",
-    file: "samsung-tv-invoice.pdf",
-    meta: "PDF · 248 KB · uploaded just now",
-    isUploaded: true,
+    file: "No file selected",
+    meta: "Required for claims (PDF, JPG)",
+    isUploaded: false,
   },
   {
     id: "warranty",
     icon: ShieldCheck,
     label: "Warranty Card",
-    file: "samsung-warranty-card.jpg",
-    meta: "JPG · 1.1 MB · uploaded just now",
-    isUploaded: true,
+    file: "No file selected",
+    meta: "Required for claims (PDF, JPG)",
+    isUploaded: false,
   },
 ];
 
