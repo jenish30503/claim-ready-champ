@@ -1,9 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ArrowRight, FileText, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, ShieldCheck, Sparkles, Scan, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/add-product")({
   head: () => ({
@@ -40,6 +42,30 @@ const files = [
 
 function AddProduct() {
   const navigate = useNavigate();
+  const [scanState, setScanState] = useState<"idle" | "scanning" | "complete">("idle");
+  const [scanProgress, setScanProgress] = useState(0);
+
+  useEffect(() => {
+    if (scanState === "scanning") {
+      const interval = setInterval(() => {
+        setScanProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            setScanState("complete");
+            toast.success("Document scanning complete.");
+            return 100;
+          }
+          return prev + 5;
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [scanState]);
+
+  const handleScan = () => {
+    setScanProgress(0);
+    setScanState("scanning");
+  };
 
   return (
     <AppShell
@@ -50,12 +76,36 @@ function AddProduct() {
     >
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="surface-card p-6">
-          <h2 className="text-base font-bold">Uploaded documents</h2>
-          <div className="mt-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold">Uploaded documents</h2>
+            {scanState === "scanning" && (
+              <span className="flex items-center gap-2 text-sm font-medium text-primary animate-pulse">
+                <Loader2 className="size-4 animate-spin" /> Scanning...
+              </span>
+            )}
+          </div>
+          
+          <div className="mt-4 relative space-y-3">
+            {scanState === "scanning" && (
+              <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm rounded-xl border border-border">
+                <Scan className="size-10 text-primary mb-4 animate-pulse" />
+                <div className="w-64 h-2 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-primary transition-all duration-100 ease-linear" 
+                    style={{ width: `${scanProgress}%` }}
+                  />
+                </div>
+                <p className="mt-3 text-sm font-medium text-muted-foreground">Extracting details... {scanProgress}%</p>
+              </div>
+            )}
+            
             {files.map((f) => (
               <div
                 key={f.file}
-                className="flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4"
+                className={cn(
+                  "flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4 transition-opacity",
+                  scanState === "scanning" && "opacity-30"
+                )}
               >
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
                   <f.icon className="size-5" />
@@ -71,7 +121,10 @@ function AddProduct() {
               </div>
             ))}
 
-            <div className="rounded-xl border border-dashed border-border p-6 text-center">
+            <div className={cn(
+              "rounded-xl border border-dashed border-border p-6 text-center transition-opacity",
+              scanState === "scanning" && "opacity-30"
+            )}>
               <p className="text-sm font-semibold">Serial-number photo</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Optional now — we&apos;ll flag it if a claim needs it.
@@ -79,17 +132,54 @@ function AddProduct() {
             </div>
           </div>
 
+          {scanState === "complete" && (
+            <div className="mt-6 rounded-xl border border-border bg-card overflow-hidden">
+              <div className="bg-muted px-4 py-3 border-b border-border flex items-center justify-between">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <Sparkles className="size-4 text-primary" /> Scan Results
+                </h3>
+              </div>
+              <div className="p-4 space-y-4">
+                <div className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Warranty End Date</p>
+                    <p className="font-bold mt-1 text-base">08 September 2027</p>
+                  </div>
+                  <span className="flex items-center gap-1.5 rounded-full bg-success/20 px-2.5 py-1 text-xs font-bold text-success">
+                    <CheckCircle2 className="size-3.5" /> Found
+                  </span>
+                </div>
+                <div className="flex items-start justify-between border-b border-border pb-4 last:border-0 last:pb-0">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">Expiry Date</p>
+                    <p className="font-bold mt-1 text-base text-destructive">Missing</p>
+                    <p className="text-xs text-muted-foreground mt-1">Could not read expiry date from document.</p>
+                  </div>
+                  <span className="flex items-center gap-1.5 rounded-full bg-destructive/20 px-2.5 py-1 text-xs font-bold text-destructive">
+                    <AlertCircle className="size-3.5" /> Not Found
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-6 flex flex-wrap gap-3">
-            <Button
-              size="lg"
-              onClick={() => {
-                toast.success("Product details extracted from your invoice.");
-                navigate({ to: "/passport" });
-              }}
-            >
-              <Sparkles className="size-4" /> Extract product details
-            </Button>
-            <Button asChild size="lg" variant="outline">
+            {scanState === "idle" ? (
+              <Button size="lg" onClick={handleScan}>
+                <Scan className="size-4" /> Scan documents
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                disabled={scanState === "scanning"}
+                onClick={() => {
+                  navigate({ to: "/passport" });
+                }}
+              >
+                <Sparkles className="size-4" /> Continue to Passport
+              </Button>
+            )}
+            <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
               <Link to="/">
                 <ArrowLeft className="size-4" /> Back to vault
               </Link>
@@ -101,7 +191,8 @@ function AddProduct() {
           <h2 className="text-base font-bold">What happens next</h2>
           <ol className="mt-4 space-y-4 text-sm">
             {[
-              "We read your documents and build a product passport.",
+              "We scan your documents using AI OCR.",
+              "We extract dates like warranty end and expiry.",
               "You confirm the details and save them to your vault.",
               "We check whether your claim proof is complete.",
             ].map((t, i) => (
@@ -122,3 +213,4 @@ function AddProduct() {
     </AppShell>
   );
 }
+
