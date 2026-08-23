@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { addSerialPhoto, warrantyClause } from "@/lib/warranty-data";
+import { addSerialPhoto, warrantyClause } from "@/lib/warranty-store";
 
 export const Route = createFileRoute("/upload-proof")({
   head: () => ({
