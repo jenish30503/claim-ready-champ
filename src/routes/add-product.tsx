@@ -25,18 +25,22 @@ export const Route = createFileRoute("/add-product")({
   component: AddProduct,
 });
 
-const files = [
+const initialFiles = [
   {
+    id: "invoice",
     icon: FileText,
     label: "Invoice / Receipt",
     file: "samsung-tv-invoice.pdf",
     meta: "PDF · 248 KB · uploaded just now",
+    isUploaded: true,
   },
   {
+    id: "warranty",
     icon: ShieldCheck,
     label: "Warranty Card",
     file: "samsung-warranty-card.jpg",
     meta: "JPG · 1.1 MB · uploaded just now",
+    isUploaded: true,
   },
 ];
 
@@ -44,6 +48,8 @@ function AddProduct() {
   const navigate = useNavigate();
   const [scanState, setScanState] = useState<"idle" | "scanning" | "complete">("idle");
   const [scanProgress, setScanProgress] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState(initialFiles);
+  const [serialFile, setSerialFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (scanState === "scanning") {
@@ -65,6 +71,28 @@ function AddProduct() {
   const handleScan = () => {
     setScanProgress(0);
     setScanState("scanning");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, id: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (id === "serial") {
+        setSerialFile(file);
+      } else {
+        setUploadedFiles(prev => prev.map(f => {
+          if (f.id === id) {
+            return {
+              ...f,
+              file: file.name,
+              meta: `${file.name.split('.').pop()?.toUpperCase() || 'FILE'} · ${(file.size / 1024).toFixed(1)} KB · uploaded just now`,
+              isUploaded: true,
+            };
+          }
+          return f;
+        }));
+      }
+      toast.success(`${file.name} uploaded successfully.`);
+    }
   };
 
   return (
@@ -99,37 +127,59 @@ function AddProduct() {
               </div>
             )}
             
-            {files.map((f) => (
-              <div
-                key={f.file}
+            {uploadedFiles.map((f) => (
+              <label
+                key={f.id}
                 className={cn(
-                  "flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4 transition-opacity",
-                  scanState === "scanning" && "opacity-30"
+                  "flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4 transition-all cursor-pointer hover:bg-muted",
+                  scanState === "scanning" && "opacity-30 pointer-events-none"
                 )}
               >
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  onChange={(e) => handleFileUpload(e, f.id)} 
+                  accept="image/*,.pdf"
+                />
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
                   <f.icon className="size-5" />
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold">{f.label}</p>
                   <p className="truncate text-sm text-muted-foreground">{f.file}</p>
                   <p className="text-xs text-muted-foreground">{f.meta}</p>
                 </div>
-                <span className="ml-auto shrink-0 rounded-full bg-success px-2.5 py-1 text-xs font-bold text-success-foreground">
-                  Uploaded
+                <span className={cn("ml-auto shrink-0 rounded-full px-2.5 py-1 text-xs font-bold", 
+                  f.isUploaded ? "bg-success text-success-foreground" : "bg-muted text-muted-foreground")}>
+                  {f.isUploaded ? "Change" : "Upload"}
                 </span>
-              </div>
+              </label>
             ))}
 
-            <div className={cn(
-              "rounded-xl border border-dashed border-border p-6 text-center transition-opacity",
-              scanState === "scanning" && "opacity-30"
+            <label className={cn(
+              "block rounded-xl border border-dashed border-border p-6 text-center transition-all cursor-pointer hover:bg-muted/50",
+              scanState === "scanning" && "opacity-30 pointer-events-none"
             )}>
-              <p className="text-sm font-semibold">Serial-number photo</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Optional now — we&apos;ll flag it if a claim needs it.
-              </p>
-            </div>
+              <input 
+                type="file" 
+                className="hidden" 
+                onChange={(e) => handleFileUpload(e, 'serial')} 
+                accept="image/*"
+              />
+              {serialFile ? (
+                <>
+                  <p className="text-sm font-semibold text-success">{serialFile.name}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Uploaded successfully - click to change</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold">Serial-number photo</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Optional now — we&apos;ll flag it if a claim needs it. (Click to upload)
+                  </p>
+                </>
+              )}
+            </label>
           </div>
 
           {scanState === "complete" && (
