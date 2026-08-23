@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Bell, Plus, Search, ShieldCheck, TriangleAlert } from "lucide-react";
+import { ArrowRight, Bell, Plus, Search, ShieldCheck, TriangleAlert, Scan } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -82,11 +82,18 @@ function Dashboard() {
             Every receipt, warranty card and serial-number photo in one place — so a claim never
             fails on missing paperwork.
           </p>
-          <Button asChild size="lg" className="mt-6">
-            <Link to="/add-product">
-              <Plus className="size-4" /> Add product
-            </Link>
-          </Button>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link to="/add-product">
+                <Plus className="size-4" /> Add product
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/scan">
+                <Scan className="size-4" /> Scan receipt
+              </Link>
+            </Button>
+          </div>
         </div>
 
         <div className="surface-card p-6">

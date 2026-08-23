@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Image as ImageIcon, Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
+import { useState } from "react";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export const Route = createFileRoute("/upload-proof")({
 
 function UploadProof() {
   const navigate = useNavigate();
+  const [fileName, setFileName] = useState<string | null>(null);
 
   return (
     <AppShell
@@ -36,28 +38,40 @@ function UploadProof() {
     >
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="surface-card p-6">
-          <div className="rounded-xl border-2 border-dashed border-primary/40 bg-accent/40 p-8 text-center">
+          <label className="block rounded-xl border-2 border-dashed border-primary/40 bg-accent/40 p-8 text-center cursor-pointer transition-colors hover:bg-accent/70">
+            <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+              if (e.target.files?.[0]) {
+                 setFileName(e.target.files[0].name);
+                 toast.success(`${e.target.files[0].name} selected.`);
+              }
+            }} />
             <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <ScanLine className="size-6" />
             </span>
             <p className="mt-4 text-sm font-bold">Photograph the serial-number label</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Usually on the back panel of the TV, near the ports.
+              Usually on the back panel of the TV, near the ports. Click to upload.
             </p>
-          </div>
+          </label>
 
-          <div className="mt-5 flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
-              <ImageIcon className="size-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-bold">samsung-tv-serial-label.jpg</p>
-              <p className="text-xs text-muted-foreground">JPG · 1.8 MB · selected</p>
+          {fileName ? (
+            <div className="mt-5 flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4">
+              <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-card text-primary">
+                <ImageIcon className="size-5" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold">{fileName}</p>
+                <p className="text-xs text-muted-foreground">JPG · Selected</p>
+              </div>
+              <span className="ml-auto shrink-0 rounded-full bg-success px-2.5 py-1 text-xs font-bold text-success-foreground">
+                Ready
+              </span>
             </div>
-            <span className="ml-auto shrink-0 rounded-full bg-success px-2.5 py-1 text-xs font-bold text-success-foreground">
-              Ready
-            </span>
-          </div>
+          ) : (
+            <div className="mt-5 flex items-center gap-4 rounded-xl border border-border bg-muted/60 p-4 opacity-50">
+               <p className="text-sm font-bold w-full text-center text-muted-foreground">No file selected yet</p>
+            </div>
+          )}
 
           <div className="mt-6 flex flex-wrap gap-3">
             <Button
