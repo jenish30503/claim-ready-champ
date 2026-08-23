@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { claimEmail, useSerialPhotoAdded, warrantyClause } from "@/lib/warranty-data";
+import { claimEmail, useSerialPhotoAdded, warrantyClause } from "@/lib/warranty-store";
 
 export const Route = createFileRoute("/case-file")({
   head: () => ({

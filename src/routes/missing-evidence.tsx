@@ -3,7 +3,7 @@ import { ArrowLeft, Check, Quote, TriangleAlert, Upload, X } from "lucide-react"
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
-import { warrantyClause } from "@/lib/warranty-data";
+import { warrantyClause } from "@/lib/warranty-store";
 
 export const Route = createFileRoute("/missing-evidence")({
   head: () => ({
