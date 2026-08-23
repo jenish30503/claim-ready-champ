@@ -214,20 +214,37 @@ function AddProduct() {
           )}
 
           <div className="mt-6 flex flex-wrap gap-3">
-            {scanState === "idle" ? (
+            {scanState === "idle" && (
               <Button size="lg" onClick={handleScan}>
                 <Scan className="size-4" /> Scan documents
               </Button>
-            ) : (
-              <Button
-                size="lg"
-                disabled={scanState === "scanning"}
-                onClick={() => {
-                  navigate({ to: "/passport" });
-                }}
-              >
-                <Sparkles className="size-4" /> Continue to Passport
+            )}
+            {scanState === "scanning" && (
+              <Button size="lg" disabled>
+                <Loader2 className="size-4 animate-spin" /> Scanning...
               </Button>
+            )}
+            {scanState === "complete" && (
+              <>
+                <Button
+                  size="lg"
+                  onClick={() => {
+                    toast.success("Product saved to your vault.");
+                    navigate({ to: "/" });
+                  }}
+                >
+                  <Sparkles className="size-4" /> Save to vault
+                </Button>
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  onClick={() => {
+                    navigate({ to: "/passport" });
+                  }}
+                >
+                  <ShieldCheck className="size-4" /> Claim warranty
+                </Button>
+              </>
             )}
             <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
               <Link to="/">
