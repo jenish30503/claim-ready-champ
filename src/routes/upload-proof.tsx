@@ -38,12 +38,15 @@ function UploadProof() {
     >
       <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
         <div className="surface-card p-6">
-          <label className="block rounded-xl border-2 border-dashed border-primary/40 bg-accent/40 p-8 text-center cursor-pointer transition-colors hover:bg-accent/70">
-            <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-              if (e.target.files?.[0]) {
-                 setFileName(e.target.files[0].name);
-                 toast.success(`${e.target.files[0].name} selected.`);
+          <label htmlFor="serial-upload" className="block rounded-xl border-2 border-dashed border-primary/40 bg-accent/40 p-8 text-center cursor-pointer transition-colors hover:bg-accent/70">
+            <input id="serial-upload" type="file" className="hidden" accept="image/*" onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                 setFileName(file.name);
+                 toast.success(`${file.name} selected.`);
               }
+              // Reset so the same file can be selected again if needed
+              e.target.value = '';
             }} />
             <span className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
               <ScanLine className="size-6" />
@@ -76,6 +79,7 @@ function UploadProof() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Button
               size="lg"
+              disabled={!fileName}
               onClick={() => {
                 addSerialPhoto();
                 toast.success("Serial-number photo added to your case file.");
