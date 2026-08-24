@@ -10,20 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AddProductRouteImport } from './routes/add-product'
 import { Route as CaseFileRouteImport } from './routes/case-file'
 import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissingEvidenceRouteImport } from './routes/missing-evidence'
 import { Route as PassportRouteImport } from './routes/passport'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UploadProofRouteImport } from './routes/upload-proof'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AddProductRoute = AddProductRouteImport.update({
@@ -56,11 +61,6 @@ const PassportRoute = PassportRouteImport.update({
   path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -76,6 +76,11 @@ const UploadProofRoute = UploadProofRouteImport.update({
   path: '/upload-proof',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,10 +90,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,24 +103,25 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/add-product': typeof AddProductRoute
   '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,10 +133,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,34 +146,35 @@ export interface FileRouteTypes {
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/profile'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/add-product'
     | '/case-file'
     | '/claim-checkup'
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/_authenticated/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AddProductRoute: typeof AddProductRoute
   CaseFileRoute: typeof CaseFileRoute
   ClaimCheckupRoute: typeof ClaimCheckupRoute
   LoginRoute: typeof LoginRoute
   MissingEvidenceRoute: typeof MissingEvidenceRoute
   PassportRoute: typeof PassportRoute
-  ProfileRoute: typeof ProfileRoute
   ScanRoute: typeof ScanRoute
   SignupRoute: typeof SignupRoute
   UploadProofRoute: typeof UploadProofRoute
@@ -180,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/add-product': {
@@ -224,13 +238,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/scan': {
       id: '/scan'
       path: '/scan'
@@ -252,18 +259,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadProofRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AddProductRoute: AddProductRoute,
   CaseFileRoute: CaseFileRoute,
   ClaimCheckupRoute: ClaimCheckupRoute,
   LoginRoute: LoginRoute,
   MissingEvidenceRoute: MissingEvidenceRoute,
   PassportRoute: PassportRoute,
-  ProfileRoute: ProfileRoute,
   ScanRoute: ScanRoute,
   SignupRoute: SignupRoute,
   UploadProofRoute: UploadProofRoute,

@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Bell, Plus, Search, ShieldCheck, TriangleAlert, Scan, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
-import { supabase } from "@/lib/supabase";
 
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
@@ -27,12 +26,6 @@ export const Route = createFileRoute("/")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: Dashboard,
 });
 

@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/lib/supabase";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowLeft, Loader2, ScanLine, Sparkles, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -31,12 +30,6 @@ export const Route = createFileRoute("/scan")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: ScanPage,
 });
 
