@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AddProductRouteImport } from './routes/add-product'
 import { Route as CaseFileRouteImport } from './routes/case-file'
 import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
@@ -24,6 +25,10 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AddProductRoute = AddProductRouteImport.update({
@@ -72,9 +77,9 @@ const UploadProofRoute = UploadProofRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
-  id: '/_authenticated/profile',
+  id: '/profile',
   path: '/profile',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -106,6 +111,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/add-product': typeof AddProductRoute
   '/case-file': typeof CaseFileRoute
   '/claim-checkup': typeof ClaimCheckupRoute
@@ -147,6 +153,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
     | '/add-product'
     | '/case-file'
     | '/claim-checkup'
@@ -161,6 +168,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AddProductRoute: typeof AddProductRoute
   CaseFileRoute: typeof CaseFileRoute
   ClaimCheckupRoute: typeof ClaimCheckupRoute
@@ -170,7 +178,6 @@ export interface RootRouteChildren {
   ScanRoute: typeof ScanRoute
   SignupRoute: typeof SignupRoute
   UploadProofRoute: typeof UploadProofRoute
-  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -180,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/add-product': {
@@ -250,13 +264,25 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AddProductRoute: AddProductRoute,
   CaseFileRoute: CaseFileRoute,
   ClaimCheckupRoute: ClaimCheckupRoute,
@@ -266,7 +292,6 @@ const rootRouteChildren: RootRouteChildren = {
   ScanRoute: ScanRoute,
   SignupRoute: SignupRoute,
   UploadProofRoute: UploadProofRoute,
-  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
