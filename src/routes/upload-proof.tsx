@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Image as ImageIcon, Plus, ScanLine } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -22,12 +22,6 @@ export const Route = createFileRoute("/upload-proof")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: UploadProof,
 });
 

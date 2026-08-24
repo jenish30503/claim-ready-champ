@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, ArrowRight, FileText, ShieldCheck, Sparkles, Scan, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -26,12 +26,6 @@ export const Route = createFileRoute("/add-product")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: AddProduct,
 });
 

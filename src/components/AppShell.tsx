@@ -2,7 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, LogOut, User as UserIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,7 +84,7 @@ export function AppShell({
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="bg-primary/10 text-primary">
-                          {user.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
+                          {user.user_metadata?.['full_name']?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -92,7 +92,7 @@ export function AppShell({
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.user_metadata?.full_name || "User"}</p>
+                        <p className="text-sm font-medium leading-none">{user.user_metadata?.['full_name'] || "User"}</p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>

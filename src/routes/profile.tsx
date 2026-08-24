@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft, LogOut, User as UserIcon } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,12 +11,6 @@ import { AppShell } from "@/components/AppShell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const Route = createFileRoute("/profile")({
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: Profile,
 });
 
@@ -26,8 +20,8 @@ function Profile() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user?.user_metadata?.full_name) {
-      setName(user.user_metadata.full_name);
+    if (user?.user_metadata?.['full_name']) {
+      setName(user.user_metadata['full_name']);
     }
   }, [user]);
 
@@ -61,11 +55,11 @@ function Profile() {
           <div className="flex items-center gap-6 mb-8 pb-8 border-b border-border">
             <Avatar className="h-20 w-20">
               <AvatarFallback className="text-2xl bg-primary/10 text-primary">
-                {user?.user_metadata?.full_name?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
+                {user?.user_metadata?.['full_name']?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div>
-              <h2 className="text-2xl font-bold">{user?.user_metadata?.full_name || "User"}</h2>
+              <h2 className="text-2xl font-bold">{user?.user_metadata?.['full_name'] || "User"}</h2>
               <p className="text-muted-foreground">{user?.email}</p>
             </div>
           </div>
