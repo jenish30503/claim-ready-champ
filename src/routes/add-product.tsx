@@ -317,30 +317,8 @@ function AddProduct() {
                 <Loader2 className="size-4 animate-spin" /> Scanning...
               </Button>
             )}
-            {scanState === "complete" && (
-              <>
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    toast.success("Product saved to your vault.");
-                    navigate({ to: "/" });
-                  }}
-                >
-                  <Sparkles className="size-4" /> Save to vault
-                </Button>
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  onClick={() => {
-                    navigate({ to: "/passport" });
-                  }}
-                >
-                  <ShieldCheck className="size-4" /> Claim warranty
-                </Button>
-              </>
-            )}
-            {(scanState === "idle" || scanState === "complete") && (
-              <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
+            {scanState === "idle" && (
+              <Button asChild size="lg" variant="outline">
                 <Link to="/">
                   <ArrowLeft className="size-4" /> Back to vault
                 </Link>
