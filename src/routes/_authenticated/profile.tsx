@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { AppShell } from "@/components/AppShell";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/_authenticated/profile")({
   component: Profile,
 });
 

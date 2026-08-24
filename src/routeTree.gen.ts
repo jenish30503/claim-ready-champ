@@ -16,10 +16,10 @@ import { Route as ClaimCheckupRouteImport } from './routes/claim-checkup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MissingEvidenceRouteImport } from './routes/missing-evidence'
 import { Route as PassportRouteImport } from './routes/passport'
-import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ScanRouteImport } from './routes/scan'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as UploadProofRouteImport } from './routes/upload-proof'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -56,11 +56,6 @@ const PassportRoute = PassportRouteImport.update({
   path: '/passport',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProfileRoute = ProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ScanRoute = ScanRouteImport.update({
   id: '/scan',
   path: '/scan',
@@ -76,6 +71,11 @@ const UploadProofRoute = UploadProofRouteImport.update({
   path: '/upload-proof',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/_authenticated/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -85,10 +85,10 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,10 +98,10 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,10 +112,10 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/missing-evidence': typeof MissingEvidenceRoute
   '/passport': typeof PassportRoute
-  '/profile': typeof ProfileRoute
   '/scan': typeof ScanRoute
   '/signup': typeof SignupRoute
   '/upload-proof': typeof UploadProofRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -127,10 +127,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,10 +140,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/profile'
   id:
     | '__root__'
     | '/'
@@ -153,10 +153,10 @@ export interface FileRouteTypes {
     | '/login'
     | '/missing-evidence'
     | '/passport'
-    | '/profile'
     | '/scan'
     | '/signup'
     | '/upload-proof'
+    | '/_authenticated/profile'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -167,10 +167,10 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MissingEvidenceRoute: typeof MissingEvidenceRoute
   PassportRoute: typeof PassportRoute
-  ProfileRoute: typeof ProfileRoute
   ScanRoute: typeof ScanRoute
   SignupRoute: typeof SignupRoute
   UploadProofRoute: typeof UploadProofRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -224,13 +224,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PassportRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/profile': {
-      id: '/profile'
-      path: '/profile'
-      fullPath: '/profile'
-      preLoaderRoute: typeof ProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/scan': {
       id: '/scan'
       path: '/scan'
@@ -252,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UploadProofRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -263,10 +263,10 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MissingEvidenceRoute: MissingEvidenceRoute,
   PassportRoute: PassportRoute,
-  ProfileRoute: ProfileRoute,
   ScanRoute: ScanRoute,
   SignupRoute: SignupRoute,
   UploadProofRoute: UploadProofRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
