@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Stethoscope, CheckCircle2, XCircle, ArrowRight, FileText, BadgeCheck } from "lucide-react";
 import { toast } from "sonner";
 

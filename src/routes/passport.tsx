@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/integrations/supabase/client";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, Bell, BellOff, CalendarDays, Copy, ShieldCheck, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 
