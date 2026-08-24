@@ -32,6 +32,7 @@ By default a new signup must confirm via email before being signed in. For a liv
 5. Replace the `beforeLoad` session gate on `/profile` with the standard protected-route layout so a hard refresh doesn't bounce a signed-in user.
 6. Mount `<Toaster />` once in the root route (currently missing) so login/signup toasts actually appear.
 7. Warranty/scan stores stay on localStorage; no schema for products in this step.
+8. Fix the typecheck errors already present in `AppShell.tsx`, `profile.tsx`, `supabase.ts`, and `add-product.tsx` (bracket access on metadata/env index signatures, a missing return path, two possibly-undefined reads, and a dead status comparison) so the build is green.
 
 ## Not included
 
