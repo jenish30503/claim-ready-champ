@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/lib/supabase";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, CheckCircle2, Quote, TriangleAlert, Upload, XCircle } from "lucide-react";
 
 import { AppShell } from "@/components/AppShell";
@@ -27,12 +26,6 @@ export const Route = createFileRoute("/missing-evidence")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: MissingEvidence,
 });
 

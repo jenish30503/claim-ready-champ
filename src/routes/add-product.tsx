@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
-import { supabase } from "@/lib/supabase";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, FileText, ShieldCheck, Sparkles, Scan, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
@@ -26,12 +25,6 @@ export const Route = createFileRoute("/add-product")({
       },
     ],
   }),
-  beforeLoad: async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      throw redirect({ to: "/login" });
-    }
-  },
   component: AddProduct,
 });
 
@@ -87,6 +80,7 @@ function AddProduct() {
       }, 100);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [scanState]);
 
   const handleScan = () => {
@@ -139,8 +133,8 @@ function AddProduct() {
       covered: ["Manufacturing defects"],
       notCovered: ["Physical / liquid damage"],
       proof: { 
-        receipt: uploadedFiles[0].isUploaded ? "available" : "missing", 
-        warrantyCard: uploadedFiles[1].isUploaded ? "available" : "missing", 
+        receipt: uploadedFiles[0]?.isUploaded ? "available" : "missing", 
+        warrantyCard: uploadedFiles[1]?.isUploaded ? "available" : "missing", 
         serialPhoto: serialFile ? "available" : "missing" 
       },
     };
