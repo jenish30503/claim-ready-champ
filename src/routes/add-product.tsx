@@ -80,6 +80,7 @@ function AddProduct() {
       }, 100);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [scanState]);
 
   const handleScan = () => {
@@ -132,8 +133,8 @@ function AddProduct() {
       covered: ["Manufacturing defects"],
       notCovered: ["Physical / liquid damage"],
       proof: { 
-        receipt: uploadedFiles[0].isUploaded ? "available" : "missing", 
-        warrantyCard: uploadedFiles[1].isUploaded ? "available" : "missing", 
+        receipt: uploadedFiles[0]?.isUploaded ? "available" : "missing", 
+        warrantyCard: uploadedFiles[1]?.isUploaded ? "available" : "missing", 
         serialPhoto: serialFile ? "available" : "missing" 
       },
     };
@@ -333,7 +334,7 @@ function AddProduct() {
               </>
             )}
             {(scanState === "idle" || scanState === "complete") && (
-              <Button asChild size="lg" variant="outline" disabled={scanState === "scanning"}>
+              <Button asChild size="lg" variant="outline">
                 <Link to="/">
                   <ArrowLeft className="size-4" /> Back to vault
                 </Link>
